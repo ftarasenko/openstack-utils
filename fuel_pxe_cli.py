@@ -11,6 +11,8 @@ if __name__ == '__main__':
     parser.add_argument("--pxe", type=str, help="Name of PXE interface.", required=True)
     parser.add_argument("--slave1", type=str, help="Name of Bond Slave1 interface.", required=True)
     parser.add_argument("--slave2", type=str, help="Name of Bond Slave2 interface.", required=True)
+    parser.add_argument("--slave3", type=str, help="Name of Bond Slave3 interface.", required=False)
+    parser.add_argument("--slave4", type=str, help="Name of Bond Slave4 interface.", required=False)
     args = parser.parse_args()
 
     keystoneauth={"auth":{"passwordCredentials":{"username": "admin", "password": "admin"},"tenantName": "admin"}}
@@ -29,14 +31,19 @@ if __name__ == '__main__':
         if len(interface['assigned_networks']) > 0:
             interface['assigned_networks'] = []
 
-    slaves = [dict({u'name': unicode(slave1)}), dict({u'name': unicode(slave2)})]
+    slaves = [dict({u'name': unicode(args.slave1)}), dict({u'name': unicode(args.slave2)})]
 
-    for interface in interfaces:
-        if interface['name'] == unicode(pxe):
-            interface['assigned_networks'] = [(item for item in osnetworks if item['name'] == u'fuelweb_admin').next()]
+    if args.slave3:
+        slaves.append(dict({u'name': unicode(args.slave3)}))
+    if args.slave4:
+        slaves.append(dict({u'name': unicode(args.slave4)}))
 
     if interfaces[-1]['name'] != 'bond0':
         interfaces.append(BOND_INTERFACE)
+
+    for interface in interfaces:
+        if interface['name'] == unicode(args.pxe):
+            interface['assigned_networks'] = [(item for item in osnetworks if item['name'] == u'fuelweb_admin').next()]
 
     interfaces[-1]['slaves'] = list(slaves)
 
