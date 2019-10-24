@@ -1,0 +1,6 @@
+#Enable L3 HA
+for ROUTER_ID in `openstack router list | grep ACTIVE | awk '{print $2}'`; do \
+     echo $ROUTER_ID; \
+     openstack router set --disable $ROUTER_ID; \
+     openstack router set --ha $ROUTER_ID; \
+     openstack router set --enable $ROUTER_ID; done
